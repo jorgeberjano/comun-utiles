@@ -202,6 +202,10 @@ public class Reflexion {
         return valorConvertido;
     }
 
+    public static Object crearObjeto(Class clazz) throws IllegalAccessException, InstantiationException {
+        return clazz.newInstance();
+    }
+
     public static Class crearClase(String nombreClase, String ruta, String codigoFuente) {
         FileWriter writer = null;
         StandardJavaFileManager fileManager = null;
