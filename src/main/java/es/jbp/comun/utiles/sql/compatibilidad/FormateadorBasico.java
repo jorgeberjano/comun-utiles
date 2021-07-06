@@ -154,4 +154,9 @@ public abstract class FormateadorBasico implements FormateadorSql {
             return null;
         }        
     }
+
+    @Override
+    public String getNombreParametro(int indice) {
+        return "$" + (indice + 1);
+    }
 }

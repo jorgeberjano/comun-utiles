@@ -2,8 +2,8 @@ package es.jbp.comun.utiles.tiempo;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -17,18 +17,18 @@ import java.util.Date;
 public class FechaHoraMs extends FechaAbstracta {
 
     private final static FechaHoraMs presente;
-    private static DateFormat formatoPorDefecto;
+    private static DateTimeFormatter formatoPorDefecto;
 
     static {
-        formatoPorDefecto = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss.SSS");
+        formatoPorDefecto = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss.SSS");
         presente = new FechaHoraMs();
     }
 
-    public static DateFormat getFormatoPorDefecto() {
+    public static DateTimeFormatter getFormatoPorDefecto() {
         return FechaHoraMs.formatoPorDefecto;
     }
 
-    public static void setFormatoPorDefecto(DateFormat formatoPorDefecto) {
+    public static void setFormatoPorDefecto(DateTimeFormatter formatoPorDefecto) {
         FechaHoraMs.formatoPorDefecto = formatoPorDefecto;
     }
 
@@ -45,16 +45,25 @@ public class FechaHoraMs extends FechaAbstracta {
     }
 
     public static FechaHoraMs parsear(String texto, String formato) {
-        Calendar calendar = crearCalendar(texto, new SimpleDateFormat(formato));
-        return calendar == null ? null : new FechaHoraMs(calendar);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formato);
+        LocalDateTime localDateTime = crearLocalDateTime(texto, formatter);
+        return localDateTime == null ? null : new FechaHoraMs(localDateTime, formatter);
     }
 
     public FechaHoraMs() {
         super(Calendar.getInstance(), formatoPorDefecto);
     }
 
+    public FechaHoraMs(LocalDateTime localDateTime) {
+        super(localDateTime, formatoPorDefecto);
+    }
+
+    public FechaHoraMs(LocalDateTime localDateTime, DateTimeFormatter formato) {
+        super(localDateTime, formato);
+    }
+
     public FechaHoraMs(FechaAbstracta fecha) {
-        super(fecha.calendar, formatoPorDefecto);
+        super(fecha.localDateTime, formatoPorDefecto);
     }
 
     public FechaHoraMs(Fecha fecha, Hora hora) {
@@ -79,10 +88,6 @@ public class FechaHoraMs extends FechaAbstracta {
 
     public FechaHoraMs(String texto) {
         super(texto, formatoPorDefecto);
-    }
-
-    public int getMilisegundo() {
-        return calendar.get(Calendar.MILLISECOND);
     }
 
     @Override

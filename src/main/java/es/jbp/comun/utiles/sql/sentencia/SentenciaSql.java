@@ -1,6 +1,7 @@
 package es.jbp.comun.utiles.sql.sentencia;
 
 import es.jbp.comun.utiles.conversion.Conversion;
+import es.jbp.comun.utiles.sql.compatibilidad.FormateadorSql;
 import es.jbp.comun.utiles.tiempo.FechaAbstracta;
 
 /**
@@ -13,7 +14,8 @@ public class SentenciaSql {
     public enum Comando {
 
         Nulo, Select, Insert, Update, Delete
-    };
+    }
+
     private Comando comando;
 
     private String strTabla = "";
@@ -48,6 +50,12 @@ public class SentenciaSql {
         order = new ClausulaBase("ORDER BY");
     }
 
+    public void count() {
+        comando = Comando.Select;
+        select.asignar("COUNT(*)");
+        order = new ClausulaBase("ORDER BY");
+    }
+
     public void select(String campos) {
         comando = Comando.Select;
         select.agregar(campos, ", ");
@@ -66,7 +74,7 @@ public class SentenciaSql {
         }
         where.agregar(str, " AND ");
     }
-    
+
     public void orderBy(String str) {
         if (Conversion.isBlank(str)) {
             return;
@@ -96,27 +104,6 @@ public class SentenciaSql {
         this.strTabla = tabla;
     }
 
-//    void agregarLeftJoin(String strTabla, String strOn) {
-//        agregarJoin(strTabla, "LEFT", strOn);
-//    }
-//
-//    void agregarRightJoin(
-//            String strTabla, String strOn) {
-//        agregarJoin(strTabla, "RIGHT", strOn);
-//    }
-//
-//    void agregarInnerJoin(
-//            String strTabla, String strOn) {
-//        agregarJoin(strTabla, "INNER", strOn);
-//    }
-//    void agregarJoin(
-//            String strTabla, String strDireccion, String strOn) {
-//        if (strFrom.isEmpty()) {
-//            return;
-//        }
-//
-//        strFrom = "(" + strFrom + ") " + strDireccion + " JOIN " + strTabla + " ON " + strOn;
-//    }
     public void setSql(String sql) {
         // TODO: implementar para otro tipo de comandos
         comando = Comando.Select;
@@ -168,7 +155,9 @@ public class SentenciaSql {
         String sql;
 
         sql = "INSERT INTO " + strTabla
-                + " (" + strListaCampos + ") VALUES (" + strListaValores + ")";
+                + " (" + strListaCampos + ") "
+                + " OUTPUT INSERTED.* " // TODO: solo SqlServer
+                + " VALUES (" + strListaValores + ");";
 
         return sql;
     }
@@ -178,6 +167,7 @@ public class SentenciaSql {
 
         sql = "UPDATE " + strTabla
                 + " SET " + strListaModificaciones
+                + " OUTPUT INSERTED.* " // TODO: solo SqlServer
                 + " " + where;
 
         return sql;
@@ -186,13 +176,11 @@ public class SentenciaSql {
     private String getDeleteSql() {
         String sql;
 
-        sql = "DELETE FROM " + strTabla + where;
+        sql = "DELETE FROM " + strTabla
+                + " OUTPUT DELETED.* " // TODO: solo SqlServer
+                + where;
         return sql;
     }
-
-//    public void asignarLuego(String strCampo) {
-//        asignarValorSql(strCampo, "?");
-//    }
 
     public void asignar(String strCampo, Object valor) {
 
@@ -214,7 +202,7 @@ public class SentenciaSql {
         } else if (valor instanceof FechaAbstracta) {
             return "'" + valor.toString() + "'";
         } else {
-            // Se sustituyen las comillas por dos comillas (codigo de escape)
+            // Se sustituyen las comillas por dos comillas (código de escape)
             return "'" + valor.toString().replace("'", "''") + "'";
         }
     }
@@ -234,12 +222,7 @@ public class SentenciaSql {
 
         strValorSql = strValorSql.trim();
         strCampo = strCampo.trim();
-//    if (strCampo.indexOf('[') == -1)
-//        strCampo = EncorchetarSql(strCampo);
 
-//        if (strValorSql.compareToIgnoreCase("null") != 0) {
-//            enlazarStrings(strFind, " AND ", strCampo + " = " + strValorSql);
-//        }
         int nPunto = strCampo.indexOf('.');
         if (nPunto != -1) {
             strCampo = strCampo.substring(nPunto + 1);
@@ -267,15 +250,15 @@ public class SentenciaSql {
         strListaValores = "";
         strListaModificaciones = "";
     }
-    
+
     public String getSelect() {
         return select.getContenido();
     }
-    
+
     public String getFrom() {
         return from.getContenido();
     }
-    
+
     public String getWhere() {
         return where.getContenido();
     }

@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Clase base para los objetos encargados de contruir entidades a parir de
- * resultados de consultas.
+ * Clase base para los objetos encargados de construir entidades a parir de resultados de consultas.
  * @author jberjano
  */
 public abstract class ConstructorEntidad<T> {

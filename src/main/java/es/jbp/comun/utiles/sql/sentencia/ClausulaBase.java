@@ -23,6 +23,13 @@ public class ClausulaBase implements Clausula {
         this.palabraClave = palabraClave;
         this.contenido = new StringBuilder();
     }
+
+    public void asignar(String texto) {
+        if (contenido.length() > 0) {
+            contenido = new StringBuilder();
+        }
+        contenido.append(texto);
+    }
     
     public void agregar(String elemento, String separador) {
         if (contenido.length() > 0) {

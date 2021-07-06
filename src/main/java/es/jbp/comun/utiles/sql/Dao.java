@@ -115,12 +115,12 @@ public abstract class Dao {
         return new EjecutorSentenciaSimple(gestorConexiones);
     }
     
-    public PlantillaSql crearPlantillaSql(String sql) {
-        return new PlantillaSql(sql, gestorConexiones.getFormateadorSql());
+    public Plantilla crearPlantillaSql(String sql) {
+        return new Plantilla(sql, gestorConexiones.getFormateadorSql());
     }
     
-    public PlantillaSql crearPlantillaSql(URL url) throws IOException {
-        return new PlantillaSql(url, gestorConexiones.getFormateadorSql());
+    public Plantilla crearPlantillaSql(URL url) throws IOException {
+        return new Plantilla(url, gestorConexiones.getFormateadorSql());
     }
 
 }

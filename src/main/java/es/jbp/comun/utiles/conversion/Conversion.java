@@ -1,17 +1,23 @@
 package es.jbp.comun.utiles.conversion;
 
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+
 import es.jbp.comun.utiles.buffer.Buffer;
 import es.jbp.comun.utiles.sql.TipoDato;
 import es.jbp.comun.utiles.tiempo.Fecha;
 import es.jbp.comun.utiles.tiempo.FechaHora;
 import es.jbp.comun.utiles.tiempo.FechaHoraMs;
+
 import java.awt.Color;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -57,7 +63,7 @@ public class Conversion {
         if (obj instanceof Float) {
             return ((Float) obj).intValue();
         }
-        
+
         try {
             return Integer.parseInt(obj.toString());
         } catch (Throwable e) {
@@ -91,12 +97,12 @@ public class Conversion {
             return Long.parseLong(obj.toString());
         } catch (Throwable e) {
         }
-        
+
         try {
             return Long.decode(obj.toString());
         } catch (Throwable e) {
         }
-        
+
         return null;
     }
 
@@ -209,7 +215,7 @@ public class Conversion {
             return valor.toString();
         }
     }
-    
+
     public static byte[] toByteArray(Object valor) {
         if (valor == null) {
             return null;
@@ -221,7 +227,7 @@ public class Conversion {
             return valor.toString().getBytes();
         }
     }
-    
+
     public static Buffer toBuffer(Object valor) {
         if (valor == null) {
             return null;
@@ -236,48 +242,85 @@ public class Conversion {
     public static Fecha toFecha(Object valor) {
         if (valor == null) {
             return null;
+        } else if (valor instanceof LocalDateTime) {
+            return new Fecha(((LocalDateTime) valor).toLocalDate());
+        } else if (valor instanceof LocalDate) {
+            return new Fecha((LocalDate) valor);
         } else if (valor instanceof Fecha) {
             return (Fecha) valor;
-        } 
-        FechaHora fechaHora = toFechaHora(valor);
-        return fechaHora == null ? null : fechaHora.getFecha();
+        } else if (valor instanceof FechaHora) {
+            return ((FechaHora) valor).getFecha();
+        } else if (valor instanceof FechaHoraMs) {
+            return ((FechaHoraMs) valor).getFecha();
+        } else if (valor instanceof Timestamp) {
+            return new Fecha((Timestamp) valor);
+        } else if (valor instanceof java.sql.Date) {
+            return new Fecha((java.sql.Date) valor);
+        } else if (valor instanceof java.util.Date) {
+            return new Fecha((java.sql.Date) valor);
+        }
+        Fecha fechaHora = new Fecha(valor.toString());
+        if (fechaHora.esValida()) {
+            return fechaHora;
+        }
+        Long ms = Conversion.toLong(valor);
+        if (ms != null) {
+            return new Fecha(ms);
+        }
+        return null;
     }
 
     public static FechaHora toFechaHora(Object valor) {
         if (valor == null) {
             return null;
+        } else if (valor instanceof LocalDateTime) {
+            return new FechaHora((LocalDateTime) valor);
+        } else if (valor instanceof LocalDate) {
+            return new FechaHora(((LocalDate) valor).atStartOfDay());
         } else if (valor instanceof Fecha) {
             return new FechaHora((Fecha) valor);
         } else if (valor instanceof FechaHora) {
             return (FechaHora) valor;
+        } else if (valor instanceof FechaHoraMs) {
+            return ((FechaHoraMs) valor).getFechaHora();
+        } else if (valor instanceof Timestamp) {
+            return new FechaHora((Timestamp) valor);
+        } else if (valor instanceof java.sql.Date) {
+            return new FechaHora((java.sql.Date) valor);
+        } else if (valor instanceof java.util.Date) {
+            return new FechaHora((java.sql.Date) valor);
         }
-        FechaHoraMs fechaHoraMs = toFechaHoraMs(valor);
-        return fechaHoraMs == null ? null : fechaHoraMs.getFechaHora();
+        FechaHora fechaHora = new FechaHora(valor.toString());
+        if (fechaHora.esValida()) {
+            return fechaHora;
+        }
+        Long ms = Conversion.toLong(valor);
+        if (ms != null) {
+            return new FechaHora(ms);
+        }
+        return null;
     }
 
     public static FechaHoraMs toFechaHoraMs(Object valor) {
         if (valor == null) {
             return null;
-        } 
-        if (valor instanceof Fecha) {
+        } else if (valor instanceof LocalDateTime) {
+            return new FechaHoraMs((LocalDateTime) valor);
+        } else if (valor instanceof LocalDate) {
+            return new FechaHoraMs(((LocalDate) valor).atStartOfDay());
+        } else if (valor instanceof Fecha) {
             return new FechaHoraMs((Fecha) valor);
-        } 
-        if (valor instanceof FechaHora) {
+        } else if (valor instanceof FechaHora) {
             return new FechaHoraMs((FechaHora) valor);
-        } 
-        if (valor instanceof FechaHoraMs) {
+        } else if (valor instanceof FechaHoraMs) {
             return (FechaHoraMs) valor;
-        }
-        if (valor instanceof Timestamp) {
+        } else if (valor instanceof Timestamp) {
             return new FechaHoraMs((Timestamp) valor);
-        }
-        if (valor instanceof java.sql.Date) {
+        } else if (valor instanceof java.sql.Date) {
+            return new FechaHoraMs((java.sql.Date) valor);
+        } else if (valor instanceof java.util.Date) {
             return new FechaHoraMs((java.sql.Date) valor);
         }
-        if (valor instanceof java.util.Date) {
-            return new FechaHoraMs((java.sql.Date) valor);
-        }        
-        
         FechaHoraMs fechaHora = new FechaHoraMs(valor.toString());
         if (fechaHora.esValida()) {
             return fechaHora;
@@ -285,11 +328,10 @@ public class Conversion {
         Long ms = Conversion.toLong(valor);
         if (ms != null) {
             return new FechaHoraMs(ms);
-            
         }
         return null;
     }
-    
+
     public static byte[] toBytes(Object valor) throws Exception {
         if (valor == null) {
             return null;
@@ -343,6 +385,7 @@ public class Conversion {
 
     /**
      * Convierte un byte en una cadena con su valor hexadecimal.
+     *
      * @param octeto
      * @return
      */

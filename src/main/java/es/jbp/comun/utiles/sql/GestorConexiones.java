@@ -11,7 +11,7 @@ import es.jbp.comun.utiles.tiempo.FechaHora;
  */
 public interface GestorConexiones {
     void inicializar() throws ClassNotFoundException;
-    Connection obtenerConexion() throws SQLException;
+    Connection obtenerConexion() throws SQLException;   
     void liberarConexion(Connection conexion);
     boolean esConexionLocal();
     FechaHora getFechaHora();

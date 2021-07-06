@@ -2,9 +2,16 @@ package es.jbp.comun.utiles.tiempo;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -17,19 +24,24 @@ import java.util.Date;
 @JsonSerialize(using = SerializadorFecha.class)
 public class Fecha extends FechaAbstracta {
 
-    private static DateFormat formatoPorDefecto = new SimpleDateFormat("dd/MM/yyyy");
+    private static DateTimeFormatter formatoPorDefecto;
     private final static Fecha presente;
 
     static {
-        formatoPorDefecto = new SimpleDateFormat("dd/MM/yyyy");
+        formatoPorDefecto =new DateTimeFormatterBuilder()
+                .appendPattern("dd/MM/yyyy[ HH:mm:ss]")
+                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+                .toFormatter();
         presente = new Fecha();
     }
 
-    public static DateFormat getFormatoPorDefecto() {
+    public static DateTimeFormatter getFormatoPorDefecto() {
         return formatoPorDefecto;
     }
 
-    public static void setFormatoPorDefecto(DateFormat formatoPorDefecto) {
+    public static void setFormatoPorDefecto(DateTimeFormatter formatoPorDefecto) {
         Fecha.formatoPorDefecto = formatoPorDefecto;
     }
 
@@ -42,25 +54,27 @@ public class Fecha extends FechaAbstracta {
     }
 
     public Fecha() {
-        super(Calendar.getInstance(), formatoPorDefecto);
-        normalizar();
+        super(LocalDate.now().atStartOfDay(), formatoPorDefecto);
     }
 
     public Fecha(String texto) {
         super(texto, formatoPorDefecto);
-        normalizar();
+    }
+
+    public Fecha(LocalDate localDate) {
+        super(localDate.atStartOfDay(), formatoPorDefecto);
+    }
+
+    public Fecha(LocalDate localDate, DateTimeFormatter formato) {
+        super(localDate.atStartOfDay(), formato);
     }
 
     public Fecha(String texto, String formato) {
-        super(texto, new SimpleDateFormat(formato));
-        normalizar();
+        super(texto, DateTimeFormatter.ofPattern(formato));
     }
 
     public Fecha(int dia, int mes, int anno) {
-        super(formatoPorDefecto);
-        calendar.set(Calendar.YEAR, anno);
-        calendar.set(Calendar.MONTH, mes - 1);
-        calendar.set(Calendar.DAY_OF_MONTH, dia);
+        super(dia, mes, anno, 0, 0, 0, 0, formatoPorDefecto);
         normalizar();
     }
 
@@ -80,11 +94,11 @@ public class Fecha extends FechaAbstracta {
     }
 
     public Fecha(FechaAbstracta fecha) {
-        super(fecha.calendar, formatoPorDefecto);
+        super(fecha.localDateTime, formatoPorDefecto);
         normalizar();
     }
-    
-     public Fecha(long milisegundos) {
+
+    public Fecha(long milisegundos) {
         super(milisegundos, formatoPorDefecto);
         normalizar();
     }
@@ -92,21 +106,19 @@ public class Fecha extends FechaAbstracta {
     public static Fecha hoy() {
         return new Fecha();
     }
-    
+
     public static Fecha parsear(String texto) {
         return texto != null ? new Fecha(texto) : null;
     }
 
     public static Fecha parsear(String texto, String formato) {
-        return new Fecha(crearCalendar(texto, new SimpleDateFormat(formato)));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formato);
+        return new Fecha(crearLocalDate(texto, formatter), formatter);
     }
 
     private void normalizar() {
-        if (calendar != null) {
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
+        if (this.localDateTime != null) {
+            this.localDateTime = localDateTime.truncatedTo(ChronoUnit.DAYS);
         }
     }
 
@@ -115,24 +127,19 @@ public class Fecha extends FechaAbstracta {
         return this == presente;
     }
 
-//    protected static Calendar crearCalendar(String texto) {
-//        return crearCalendar(texto, formatoPorDefecto);
-//    }
     public Fecha masDias(int dias) {
         if (esNula()) {
             return this;
         }
-        Calendar cal = getCalendar();
-        cal.add(Calendar.DAY_OF_YEAR, dias);
-        return new Fecha(cal);
+        LocalDate result = localDateTime.plusDays(dias).toLocalDate();
+        return new Fecha(result, formato);
     }
 
     public Fecha masMeses(int meses) {
         if (esNula()) {
             return this;
         }
-        Calendar cal = getCalendar();
-        cal.add(Calendar.MONTH, meses);
-        return new Fecha(cal);
+        LocalDate result = localDateTime.plusMonths(meses).toLocalDate();
+        return new Fecha(result, formato);
     }
 }

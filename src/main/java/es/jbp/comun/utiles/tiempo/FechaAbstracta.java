@@ -2,12 +2,10 @@ package es.jbp.comun.utiles.tiempo;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 /**
  * Clase base para Fecha y FechaHora
@@ -15,121 +13,109 @@ import java.util.List;
  * @author jberjano
  */
 public abstract class FechaAbstracta implements Serializable {
-
-    protected final Calendar calendar;
-    protected final DateFormat formato;
-    protected static List<DateFormat> formatosAlternativos;
+    protected LocalDateTime localDateTime;
+    protected final DateTimeFormatter formato;
+    protected static List<DateTimeFormatter> formatosAlternativos;
     static {
         formatosAlternativos = new ArrayList<>();
-        formatosAlternativos.add(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss.SSS"));
-        formatosAlternativos.add(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss"));
-        formatosAlternativos.add(new SimpleDateFormat("dd/MM/yyyy HH:mm"));
-        formatosAlternativos.add(new SimpleDateFormat("dd/MM/yyyy"));
-        formatosAlternativos.add(new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS"));
-        formatosAlternativos.add(new SimpleDateFormat("dd-MM-yyyy HH:mm:ss"));
-        formatosAlternativos.add(new SimpleDateFormat("dd-MM-yyyy HH:mm"));
-        formatosAlternativos.add(new SimpleDateFormat("dd-MM-yyyy"));
+
+        formatosAlternativos.add(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss.SSS"));
+        formatosAlternativos.add(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+        formatosAlternativos.add(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        formatosAlternativos.add(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        formatosAlternativos.add(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss.SSS"));
+        formatosAlternativos.add(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
+        formatosAlternativos.add(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
+        formatosAlternativos.add(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
     }
 
-    public FechaAbstracta(DateFormat formato) {
+    public FechaAbstracta(DateTimeFormatter formato) {
         this.formato = formato;
-        calendar = Calendar.getInstance();
+        localDateTime = LocalDateTime.now();
     }
 
-    public FechaAbstracta(Calendar calendar, DateFormat formato) {
+    public FechaAbstracta(LocalDateTime localDateTime, DateTimeFormatter formato) {
         this.formato = formato;
-        this.calendar = (Calendar) calendar.clone();
+        this.localDateTime = localDateTime;
     }
 
-    public FechaAbstracta(Date date, DateFormat formato) {
+    public FechaAbstracta(Calendar calendar, DateTimeFormatter formato) {
         this.formato = formato;
-        if (date == null) {
-            this.calendar = null;
-        } else {
-            this.calendar = Calendar.getInstance();
-            this.calendar.setTime(date);
-        }
+
+        TimeZone tz = calendar.getTimeZone();
+        ZoneId zoneId = tz.toZoneId();
+        this.localDateTime = LocalDateTime.ofInstant(calendar.toInstant(), zoneId);
     }
 
-    public FechaAbstracta(long milisegundos, DateFormat formato) {
+    public FechaAbstracta(Date date, DateTimeFormatter formato) {
         this.formato = formato;
-        this.calendar = Calendar.getInstance();
-        this.calendar.setTimeInMillis(milisegundos);
+        localDateTime = Instant.ofEpochMilli(date.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
     }
 
-    public FechaAbstracta(Fecha fecha, Hora hora, DateFormat formato) {
+    public FechaAbstracta(long milisegundos, DateTimeFormatter formato) {
         this.formato = formato;
-        calendar = fecha.calendar;
-        calendar.set(Calendar.HOUR_OF_DAY, hora.getHora());
-        calendar.set(Calendar.MINUTE, hora.getMinuto());
-        calendar.set(Calendar.SECOND, hora.getSegundo());
+        localDateTime = Instant.ofEpochMilli(milisegundos)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
     }
 
-    public FechaAbstracta(String texto, DateFormat formato) {
+    public FechaAbstracta(Fecha fecha, Hora hora, DateTimeFormatter formato) {
         this.formato = formato;
-        Calendar calendarCandidato = crearCalendar(texto, formato);
-        if (calendarCandidato != null) {
-            calendar = calendarCandidato;
-            return;
-        }
-        for (DateFormat otroFormato : formatosAlternativos) {
-            calendarCandidato = crearCalendar(texto, otroFormato);
-            if (calendarCandidato != null) {
-                calendar = calendarCandidato;
-                return;
+        localDateTime = LocalDateTime.from(fecha.getLocalDateTime());
+    }
+
+    public FechaAbstracta(String texto, DateTimeFormatter formato) {
+        this.formato = formato;
+        LocalDateTime candidato = crearLocalDateTime(texto, formato);
+        if (candidato == null) {
+            for (DateTimeFormatter otroFormato : formatosAlternativos) {
+                candidato = crearLocalDateTime(texto, otroFormato);
             }
         }
-        calendar = null;
+        localDateTime = candidato;
     }
 
-    public FechaAbstracta(int dia, int mes, int anno, int hora, int min, int seg, int ms, DateFormat formato) {
+    public FechaAbstracta(int dia, int mes, int anno, int hora, int min, int seg, int ms, DateTimeFormatter formato) {
         this.formato = formato;
-        calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, anno);
-        calendar.set(Calendar.MONTH, mes - 1);
-        calendar.set(Calendar.DAY_OF_MONTH, dia);
-        calendar.set(Calendar.HOUR_OF_DAY, hora);
-        calendar.set(Calendar.MINUTE, min);
-        calendar.set(Calendar.SECOND, seg);
-        calendar.set(Calendar.MILLISECOND, ms);
+        localDateTime = LocalDateTime.of(anno, mes, dia, hora, min, seg, ms * 1000000);
     }
 
-    protected static Calendar crearCalendar(String texto, DateFormat formato) {
-        Calendar calendar = Calendar.getInstance();
-        try {
-            calendar.setTime(formato.parse(texto));
-        } catch (Throwable ex) {
-            calendar = null;
-        }
-        return calendar;
+    protected static LocalDateTime crearLocalDateTime(String texto, DateTimeFormatter formato) {
+        return LocalDateTime.parse(texto, formato);
+    }
+
+    protected static LocalDate crearLocalDate(String texto, DateTimeFormatter formato) {
+        return LocalDate.parse(texto, formato);
     }
 
     public abstract boolean esPresente();
 
-    protected final DateFormat getFormato() {
+    protected final DateTimeFormatter getFormato() {
         return formato;
     }
 
     public boolean esValida() {
-        return calendar != null;
+        return localDateTime != null;
     }
 
     public boolean esNula() {
-        return calendar == null;
+        return localDateTime == null;
     }
 
     public boolean esAnteriorA(FechaAbstracta otraFecha) {
         if (esNula() || otraFecha == null || otraFecha.esNula()) {
             return false;
         }
-        return calendar.before(otraFecha.calendar);
+        return localDateTime.isBefore(otraFecha.localDateTime);
     }
 
     public boolean esPosteriorA(FechaAbstracta otraFecha) {
         if (esNula() || otraFecha == null || otraFecha.esNula()) {
             return false;
         }
-        return calendar.after(otraFecha.calendar);
+        return localDateTime.isAfter(otraFecha.localDateTime);
     }
 
     /**
@@ -141,23 +127,23 @@ public abstract class FechaAbstracta implements Serializable {
         if (otraFecha == null) {
             return false;
         }
-        return esMismoDia(otraFecha.calendar);
+        return getDiaDelMes() == otraFecha.getDiaDelMes()
+                && getMes() == otraFecha.getMes()
+                && getAno() == otraFecha.getAno();
     }
 
     /**
      * Indica se la fecha coincide en día con otra fecha expresada con un objeto
-     * calendar.
-     *
-     * @return
+     * LocalDateTime.
      */
-    public boolean esMismoDia(Calendar otroCalendar) {
-        if (esNula() || otroCalendar == null) {
+    public boolean esMismoDia(LocalDateTime otroLocalDateTime) {
+        if (esNula() || otroLocalDateTime == null) {
             return false;
         }
 
-        return calendar.get(Calendar.DATE) == otroCalendar.get(Calendar.DATE)
-                && calendar.get(Calendar.MONTH) == otroCalendar.get(Calendar.MONTH)
-                && calendar.get(Calendar.YEAR) == otroCalendar.get(Calendar.YEAR);
+        return localDateTime.getDayOfMonth() == otroLocalDateTime.getDayOfMonth()
+                && localDateTime.getMonth() == otroLocalDateTime.getMonth()
+                && localDateTime.getYear() == otroLocalDateTime.getYear();
     }
 
     /**
@@ -166,7 +152,7 @@ public abstract class FechaAbstracta implements Serializable {
      * @return
      */
     public boolean esHoy() {
-        return esMismoDia(Calendar.getInstance());
+        return esMismoDia(LocalDateTime.now());
     }
 
     /**
@@ -178,7 +164,7 @@ public abstract class FechaAbstracta implements Serializable {
         if (esNula()) {
             return false;
         }
-        return calendar.compareTo(Calendar.getInstance()) < 0;
+        return localDateTime.compareTo(LocalDateTime.now()) < 0;
     }
 
     /**
@@ -190,7 +176,7 @@ public abstract class FechaAbstracta implements Serializable {
         if (esNula()) {
             return false;
         }
-        return calendar.compareTo(Calendar.getInstance()) > 0;
+        return localDateTime.compareTo(LocalDateTime.now()) > 0;
     }
 
     /**
@@ -202,7 +188,7 @@ public abstract class FechaAbstracta implements Serializable {
         if (esNula()) {
             return 0;
         }
-        return calendar.get(Calendar.DAY_OF_MONTH);
+        return localDateTime.getDayOfMonth();
     }
 
     /**
@@ -236,8 +222,8 @@ public abstract class FechaAbstracta implements Serializable {
         if (esNula()) {
             return 0;
         }
-        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-        return dayOfWeek == 1 ? 7 : dayOfWeek - 1;
+        DayOfWeek dayOfWeek = localDateTime.getDayOfWeek();
+        return dayOfWeek.getValue();
     }
 
     /**
@@ -247,7 +233,7 @@ public abstract class FechaAbstracta implements Serializable {
      * @return
      */
     public int getMes() {
-        return calendar.get(Calendar.MONTH) + 1;
+        return localDateTime.getMonthValue();
     }
 
     /**
@@ -256,7 +242,7 @@ public abstract class FechaAbstracta implements Serializable {
      * @return
      */
     public int getAno() {
-        return calendar.get(Calendar.YEAR);
+        return localDateTime.getYear();
     }
 
     public int diferenciaDias(FechaAbstracta otraFecha) {
@@ -281,9 +267,13 @@ public abstract class FechaAbstracta implements Serializable {
         if (esNula()) {
             return 0;
         }
-        long diff = calendar.getTime().getTime() - otraFecha.calendar.getTime().getTime();
+        return otraFecha.localDateTime.until(localDateTime, ChronoUnit.MILLIS);
+    }
 
-        return diff;
+    public long toEpochMilli() {
+        return LocalDateTime
+                .of(1970, 1, 1, 0, 0, 0)
+                .until(localDateTime, ChronoUnit.MILLIS);
     }
 
     @Override
@@ -298,7 +288,7 @@ public abstract class FechaAbstracta implements Serializable {
             return true;
         }
         FechaAbstracta otraFecha = (FechaAbstracta) obj;
-        return calendar.equals(otraFecha.calendar);
+        return localDateTime.equals(otraFecha.localDateTime);
     }
 
     @Override
@@ -306,10 +296,14 @@ public abstract class FechaAbstracta implements Serializable {
         if (esNula()) {
             return 0;
         }
-        return (int) this.calendar.getTimeInMillis();
+        return Long.valueOf(toEpochMilli()).intValue();
     }
 
     public Calendar toCalendar() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.clear();
+        calendar.set(localDateTime.getYear(), localDateTime.getMonthValue() - 1, localDateTime.getDayOfMonth(),
+                localDateTime.getHour(), localDateTime.getMinute(), localDateTime.getSecond());
         return calendar;
     }
 
@@ -317,21 +311,23 @@ public abstract class FechaAbstracta implements Serializable {
         if (esNula()) {
             return null;
         }
-        return calendar.getTime();
+        return java.util.Date
+                .from(localDateTime.atZone(ZoneId.systemDefault())
+                        .toInstant());
     }
 
-    public java.sql.Date toSqlDate() {
-        if (esNula()) {
-            return null;
-        }
-        return new java.sql.Date(calendar.getTimeInMillis());
-    }
+//    public java.sql.Date toSqlDate() {
+//        if (esNula()) {
+//            return null;
+//        }
+//        return java.sql.Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+//    }
 
     public Timestamp toTimestamp() {
         if (esNula()) {
             return null;
         }
-        return new Timestamp(calendar.getTimeInMillis());
+        return Timestamp.valueOf(localDateTime);
     }
 
     public final int compareTo(FechaAbstracta otraFecha) {
@@ -339,28 +335,28 @@ public abstract class FechaAbstracta implements Serializable {
         if (esNula() || otraFechaEsNula) {
             return esNula() && otraFechaEsNula? 0 : 1;
         }
-        return calendar.compareTo(otraFecha.calendar);
+        return localDateTime.compareTo(otraFecha.localDateTime);
     }
 
-    public Calendar getCalendar() {
+    public LocalDateTime getLocalDateTime() {
         if (esPresente()) {
-            return Calendar.getInstance();
+            return LocalDateTime.now();
         }
-        return (Calendar) calendar.clone();
+        return localDateTime;
     }
 
     public String formatear(String formato) {
         if (formato == null) {
             return "";
         }
-        return formatear(new SimpleDateFormat(formato));
+        return formatear(DateTimeFormatter.ofPattern(formato));
     }
 
-    public String formatear(DateFormat formateador) {
+    public String formatear(DateTimeFormatter formateador) {
         if (esNula() || formateador == null) {
             return "";
         } else {
-            return formateador.format(calendar.getTime());
+            return formateador.format(localDateTime);
         }
     }
 
@@ -373,20 +369,21 @@ public abstract class FechaAbstracta implements Serializable {
         return toString();
     }
 
+    @Deprecated
     public Timestamp getTimestamp() {
-        return new Timestamp(calendar.getTimeInMillis());
+        return Timestamp.valueOf(localDateTime);
     }
 
     public final Fecha getFecha() {
-        return new Fecha(calendar);
+        return new Fecha(localDateTime.toLocalDate(), formato);
     }
 
     public final FechaHora getFechaHora() {
-        return new FechaHora(calendar);
+        return new FechaHora(localDateTime, formato);
     }
 
     public final FechaHoraMs getFechaHoraMs() {
-        return new FechaHoraMs(calendar);
+        return new FechaHoraMs(localDateTime, formato);
     }
 
     public static long diferenciaEnMinutos(FechaHora fechaDesde, FechaHora fechaHasta) {
@@ -408,24 +405,28 @@ public abstract class FechaAbstracta implements Serializable {
         if (esNula()) {
             return 0;
         }
-        return calendar.get(Calendar.HOUR_OF_DAY);
+        return localDateTime.getHour();
     }
 
     public int getMinuto() {
         if (esNula()) {
             return 0;
         }
-        return calendar.get(Calendar.MINUTE);
+        return localDateTime.getMinute();
     }
 
     public int getSegundo() {
         if (esNula()) {
             return 0;
         }
-        return calendar.get(Calendar.SECOND);
+        return localDateTime.getSecond();
     }
 
     public Hora getHora() {
-        return new Hora(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND));
+        return new Hora(localDateTime.getHour(), localDateTime.getMinute(), localDateTime.getSecond());
+    }
+
+    public java.sql.Date toSqlDate() {
+        return java.sql.Date.valueOf(localDateTime.toLocalDate());
     }
 }

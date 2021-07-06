@@ -4,7 +4,7 @@ import es.jbp.comun.utiles.sql.esquema.CampoBd;
 import java.sql.SQLException;
 
 /**
- * Constructor de un objeto String a partir del resltado de una consulta.
+ * Constructor de un objeto String a partir del resultado de una consulta.
  * @author jberjano
  */
 public class ConstructorString extends ConstructorEntidad<String> {

@@ -49,7 +49,7 @@ public class FechaHoraTest {
 
         //Fecha f1 = new Fecha(1, 10, 2018);
         //Fecha f2 = new Fecha(31, 10, 2018);
-        long difms = f2.getCalendar().getTime().getTime() - f1.getCalendar().getTime().getTime();
+        long difms = f2.toEpochMilli() - f1.toEpochMilli();
         long dias = difms / (1000 * 60 * 60 * 24);
         assertEquals(1, dias);
     }
@@ -64,14 +64,14 @@ public class FechaHoraTest {
     }
 
     @Test
-    public void testDiferenciaDiasMarzoMal() {
+    public void testDiferenciaDiasMarzo() {
 
         Fecha f1 = new Fecha(1, 3, 2018);
         Fecha f2 = new Fecha(31, 3, 2018);
 
-        long difms = f2.getCalendar().getTime().getTime() - f1.getCalendar().getTime().getTime();
+        long difms = f2.toEpochMilli() - f1.toEpochMilli();
         long dias = difms / (1000 * 60 * 60 * 24);
-        assertNotEquals(30, dias);
+        assertEquals(30, dias);
     }
 
     @Test

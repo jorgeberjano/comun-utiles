@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -17,35 +20,18 @@ import java.util.Date;
 public class FechaHora extends FechaAbstracta {
 
     private final static FechaHora presente;
-    private static DateFormat formatoPorDefecto;
-
-//    public class Deserializador extends JsonDeserializer<FechaHora> {
-//
-//        @Override
-//        public FechaHora deserialize(JsonParser jp, DeserializationContext dc)
-//                throws IOException, JsonProcessingException {            
-//            return new FechaHora(dc.readValue(jp, String.class));
-//        }
-//        
-//    }
-//    public class Serializador extends JsonSerializer<FechaHora> {
-//
-//            @Override
-//            public void serialize(FechaHora value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
-//                jgen.writeString(value.toString());
-//            }            
-//        }
+    private static DateTimeFormatter formatoPorDefecto;
 
     static {
-        formatoPorDefecto = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        formatoPorDefecto = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         presente = new FechaHora();
     }
 
-    public static DateFormat getFormatoPorDefecto() {
+    public static DateTimeFormatter getFormatoPorDefecto() {
         return FechaHora.formatoPorDefecto;
     }
 
-    public static void setFormatoPorDefecto(DateFormat formatoPorDefecto) {
+    public static void setFormatoPorDefecto(DateTimeFormatter formatoPorDefecto) {
         FechaHora.formatoPorDefecto = formatoPorDefecto;
     }
 
@@ -62,7 +48,8 @@ public class FechaHora extends FechaAbstracta {
     }
 
     public static FechaHora parsear(String texto, String formato) {
-        return new FechaHora(crearCalendar(texto, new SimpleDateFormat(formato)));
+        DateTimeFormatter formateador = DateTimeFormatter.ofPattern(formato);
+        return new FechaHora(crearLocalDateTime(texto, formateador), formateador);
     }
 
     public FechaHora() {
@@ -70,8 +57,18 @@ public class FechaHora extends FechaAbstracta {
         normalizar();
     }
 
+    public FechaHora(LocalDateTime localDateTime) {
+        super(localDateTime, formatoPorDefecto);
+        normalizar();
+    }
+
+    public FechaHora(LocalDateTime localDateTime, DateTimeFormatter formato) {
+        super(localDateTime, formato);
+        normalizar();
+    }
+
     public FechaHora(FechaAbstracta fecha) {
-        super(fecha.calendar, formatoPorDefecto);
+        super(fecha.localDateTime, formatoPorDefecto);
         normalizar();
     }
 
@@ -106,13 +103,13 @@ public class FechaHora extends FechaAbstracta {
     }
 
     public FechaHora(String texto, String formato) {
-        super(texto, new SimpleDateFormat(formato));
+        super(texto, DateTimeFormatter.ofPattern(formato));
         normalizar();
     }
 
     private void normalizar() {
-        if (this.calendar != null) {
-            this.calendar.set(Calendar.MILLISECOND, 0);
+        if (this.localDateTime != null) {
+            this.localDateTime = localDateTime.withNano(0);
         }
     }
 
@@ -125,26 +122,23 @@ public class FechaHora extends FechaAbstracta {
         if (esNula()) {
             return this;
         }
-        Calendar nuevoCalendar = (Calendar) calendar.clone();
-        nuevoCalendar.add(Calendar.HOUR_OF_DAY, horas);
-        return new FechaHora(nuevoCalendar);
+        LocalDateTime result = localDateTime.plusHours(horas);
+        return new FechaHora(result, formato);
     }
 
     public FechaHora masMinutos(int minutos) {
         if (esNula()) {
             return this;
         }
-        Calendar nuevoCalendar = (Calendar) calendar.clone();
-        nuevoCalendar.add(Calendar.MINUTE, minutos);
-        return new FechaHora(nuevoCalendar);
+        LocalDateTime result = localDateTime.plusMinutes(minutos);
+        return new FechaHora(result, formato);
     }
 
     public FechaHora masSegundos(int segundos) {
         if (esNula()) {
             return this;
         }
-        Calendar nuevoCalendar = (Calendar) calendar.clone();
-        nuevoCalendar.add(Calendar.SECOND, segundos);
-        return new FechaHora(nuevoCalendar);
+        LocalDateTime result = localDateTime.plusSeconds(segundos);
+        return new FechaHora(result, formato);
     }
 }

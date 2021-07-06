@@ -8,7 +8,7 @@ import java.util.List;
 import es.jbp.comun.utiles.sql.sentencia.SentenciaSql;
 
 /**
- * Ejecutor de sentecias inserción de entidades
+ * Ejecutor de sentencias de inserción de entidades
  *
  * @author jberjano
  */

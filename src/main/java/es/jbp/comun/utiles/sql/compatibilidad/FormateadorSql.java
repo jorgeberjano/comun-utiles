@@ -57,4 +57,6 @@ public interface FormateadorSql {
     FechaHora toFechaHora(Object valor);
     
     FechaHoraMs toFechaHoraMs(Object valor);
+
+    String getNombreParametro(int indice);
 }

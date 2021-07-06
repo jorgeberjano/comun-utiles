@@ -18,6 +18,7 @@ public class CompatibilidadSql {
         agregarFormateador("jstels.jdbc.xml", new FormateadorXml());
         agregarFormateador("net.ucanaccess.jdbc", new FormateadorAccess());
         agregarFormateador("org.sqlite.JDBC", new FormateadorSQLite());
+        agregarFormateador("sqlserver", new FormateadorMsSql());
     }
 
     public static FormateadorSql getFormateador(String driver) {

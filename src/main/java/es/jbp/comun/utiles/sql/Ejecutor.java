@@ -4,7 +4,7 @@ package es.jbp.comun.utiles.sql;
  * Clase base para los ejecutores de sentencias de bases de datos
  * @author jberjano
  */
-public class Ejecutor {
+public class    Ejecutor {
     private StringBuilder builder = new StringBuilder();
     
     protected void traza(Object obj) {
