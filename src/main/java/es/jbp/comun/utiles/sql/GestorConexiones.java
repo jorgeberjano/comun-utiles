@@ -13,7 +13,6 @@ public interface GestorConexiones {
     void inicializar() throws ClassNotFoundException;
     Connection obtenerConexion() throws SQLException;   
     void liberarConexion(Connection conexion);
-    boolean esConexionLocal();
     FechaHora getFechaHora();
     FormateadorSql getFormateadorSql();
     String getDriver();

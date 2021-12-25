@@ -71,10 +71,10 @@ public class GestorConexionesEfimeras implements GestorConexiones {
         ultimoError = ex.getMessage();
     }
 
-    @Override
-    public boolean esConexionLocal() {
-        return local;
-    }
+//    @Override
+//    public boolean esConexionLocal() {
+//        return local;
+//    }
 
     @Override
     public FormateadorSql getFormateadorSql() {

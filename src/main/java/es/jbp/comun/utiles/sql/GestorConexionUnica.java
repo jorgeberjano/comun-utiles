@@ -95,11 +95,11 @@ public class GestorConexionUnica implements GestorConexiones {
             cerrarConexion();
         }
     }
-
-    @Override
-    public boolean esConexionLocal() {
-        return local;
-    }
+//
+//    @Override
+//    public boolean esConexionLocal() {
+//        return local;
+//    }
 
     @Override
     public FormateadorSql getFormateadorSql() {

@@ -87,7 +87,7 @@ public class FormateadorMsSql extends FormateadorBasico {
 
     @Override
     public String getCaracterComodin() {
-        return "*";
+        return "%";
     }
 
     @Override

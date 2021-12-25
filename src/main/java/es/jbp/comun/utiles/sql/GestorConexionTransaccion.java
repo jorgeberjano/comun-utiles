@@ -64,11 +64,6 @@ public class GestorConexionTransaccion implements GestorConexiones {
     }
 
     @Override
-    public boolean esConexionLocal() {
-        return gestorConexiones.esConexionLocal();
-    }
-
-    @Override
     public FechaHora getFechaHora() {
         return gestorConexiones.getFechaHora();
     }

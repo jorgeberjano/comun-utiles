@@ -220,14 +220,6 @@ public class GestorConexionesRemotaLocal implements GestorConexiones {
     }
 
     @Override
-    public boolean esConexionLocal() {
-        if (gestorConexionActual == null) {
-            return false;
-        }
-        return gestorConexionActual == gestorConexionLocal;
-    }
-
-    @Override
     public FechaHora getFechaHora() {
         if (gestorConexionActual == null) {
             return null;
@@ -252,7 +244,6 @@ public class GestorConexionesRemotaLocal implements GestorConexiones {
                 gestorConexionRemota.cerrarConexion();
             }
             gestorConexionActual = gestorConexion;
-            //PlantillaSql.setFormateadorSql(getFormateadorSql());
         }
     }
 

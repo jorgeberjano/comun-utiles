@@ -11,7 +11,7 @@ import java.util.List;
 public class PaginaEntidades<T> {
 
     private List<T> listaEntidades;
-    private int numeroTotalEntidades;
+    private long numeroTotalEntidades;
 
     public List<T> getListaEntidades() {
         return listaEntidades;
@@ -21,11 +21,11 @@ public class PaginaEntidades<T> {
         this.listaEntidades = listaEntidades;
     }
 
-    public int getNumeroTotalEntidades() {
+    public long getNumeroTotalEntidades() {
         return numeroTotalEntidades;
     }
 
-    public void setNumeroTotalEntidades(int numeroTotalEntidades) {
+    public void setNumeroTotalEntidades(long numeroTotalEntidades) {
         this.numeroTotalEntidades = numeroTotalEntidades;
     }
     

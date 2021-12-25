@@ -22,22 +22,22 @@ public class PoolConexiones implements GestorConexiones {
     private final String cadenaConexion;
     private final String usuario;
     private final String password;
-    private final boolean local;
+//    private final boolean local;
     private List<Connection> pool = new ArrayList();
     private String ultimoError;
     private final ConstructorFechaHora constructorFechaHora = new ConstructorFechaHora();
 
     @Override
-    public void finalize() {
+    protected void finalize() {
         cerrarConexiones();
     }
 
-    public PoolConexiones(String driver, String cadenaConexion, String usuario, String password, boolean local) {
+    public PoolConexiones(String driver, String cadenaConexion, String usuario, String password) {
         this.driver = driver;
         this.cadenaConexion = cadenaConexion;
         this.usuario = usuario;
         this.password = password;
-        this.local = local;
+//        this.local = local;
     }
 
     @Override
@@ -97,10 +97,10 @@ public class PoolConexiones implements GestorConexiones {
         }
     }
 
-    @Override
-    public boolean esConexionLocal() {
-        return local;
-    }
+//    @Override
+//    public boolean esConexionLocal() {
+//        return local;
+//    }
 
     @Override
     public FormateadorSql getFormateadorSql() {
