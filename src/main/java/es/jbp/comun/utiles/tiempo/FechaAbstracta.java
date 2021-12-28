@@ -83,11 +83,19 @@ public abstract class FechaAbstracta implements Serializable {
     }
 
     protected static LocalDateTime crearLocalDateTime(String texto, DateTimeFormatter formato) {
-        return LocalDateTime.parse(texto, formato);
+        try {
+            return LocalDateTime.parse(texto, formato);
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     protected static LocalDate crearLocalDate(String texto, DateTimeFormatter formato) {
-        return LocalDate.parse(texto, formato);
+        try {
+            return LocalDate.parse(texto, formato);
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     public abstract boolean esPresente();
@@ -233,6 +241,9 @@ public abstract class FechaAbstracta implements Serializable {
      * @return
      */
     public int getMes() {
+        if (esNula()) {
+            return 0;
+        }
         return localDateTime.getMonthValue();
     }
 
@@ -242,6 +253,9 @@ public abstract class FechaAbstracta implements Serializable {
      * @return
      */
     public int getAno() {
+        if (esNula()) {
+            return 0;
+        }
         return localDateTime.getYear();
     }
 
@@ -338,6 +352,15 @@ public abstract class FechaAbstracta implements Serializable {
         return localDateTime.compareTo(otraFecha.localDateTime);
     }
 
+    public LocalDate getLocalDate() {
+        if (esNula()) {
+            return null;
+        } else if (esPresente()) {
+            return LocalDate.now();
+        }
+        return localDateTime.toLocalDate();
+    }
+
     public LocalDateTime getLocalDateTime() {
         if (esPresente()) {
             return LocalDateTime.now();
@@ -423,10 +446,16 @@ public abstract class FechaAbstracta implements Serializable {
     }
 
     public Hora getHora() {
+        if (esNula()) {
+            return null;
+        }
         return new Hora(localDateTime.getHour(), localDateTime.getMinute(), localDateTime.getSecond());
     }
 
     public java.sql.Date toSqlDate() {
+        if (esNula()) {
+            return null;
+        }
         return java.sql.Date.valueOf(localDateTime.toLocalDate());
     }
 }

@@ -5,6 +5,7 @@ import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -202,8 +203,9 @@ public class Reflexion {
         return valorConvertido;
     }
 
-    public static Object crearObjeto(Class clazz) throws IllegalAccessException, InstantiationException {
-        return clazz.newInstance();
+    public static <T> T crearObjeto(Class clazz) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        //return clazz.newInstance();
+        return (T) clazz.getConstructor().newInstance();
     }
 
     public static Class crearClase(String nombreClase, String ruta, String codigoFuente) {

@@ -1,28 +1,19 @@
 package es.jbp.comun.utiles.conversion;
 
-import java.io.ByteArrayOutputStream;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
-
 import es.jbp.comun.utiles.buffer.Buffer;
-import es.jbp.comun.utiles.sql.TipoDato;
 import es.jbp.comun.utiles.tiempo.Fecha;
 import es.jbp.comun.utiles.tiempo.FechaHora;
 import es.jbp.comun.utiles.tiempo.FechaHoraMs;
 
-import java.awt.Color;
-import java.io.UnsupportedEncodingException;
+import java.awt.*;
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -686,27 +677,27 @@ public class Conversion {
         return strResultado;
     }
 
-    public static Object convertirValor(Object valor, TipoDato tipoDato) {
-        switch (tipoDato) {
-            case CADENA:
-                return Conversion.toString(valor);
-            case ENTERO:
-                return Conversion.toLong(valor);
-            case REAL:
-                return Conversion.toDouble(valor);
-            case BOOLEANO:
-                return Conversion.toBoolean(valor);
-            case FECHA:
-                return Conversion.toFecha(valor);
-            case FECHA_HORA:
-                FechaHora fechaHora = Conversion.toFechaHora(valor);
-                return fechaHora != null ? fechaHora : Conversion.toFecha(valor);
-            case BYTES:
-                return Conversion.toByteArray(valor);
-            default:
-                return null;
-        }
-    }
+//    public static Object convertirValor(Object valor, TipoDato tipoDato) {
+//        switch (tipoDato) {
+//            case CADENA:
+//                return Conversion.toString(valor);
+//            case ENTERO:
+//                return Conversion.toLong(valor);
+//            case REAL:
+//                return Conversion.toDouble(valor);
+//            case BOOLEANO:
+//                return Conversion.toBoolean(valor);
+//            case FECHA:
+//                return Conversion.toFecha(valor);
+//            case FECHA_HORA:
+//                FechaHora fechaHora = Conversion.toFechaHora(valor);
+//                return fechaHora != null ? fechaHora : Conversion.toFecha(valor);
+//            case BYTES:
+//                return Conversion.toByteArray(valor);
+//            default:
+//                return null;
+//        }
+//    }
 
     public static Color toColor(String valorString) {
         try {

@@ -11,6 +11,7 @@ import static es.jbp.comun.utiles.sql.TipoDato.FECHA;
 import static es.jbp.comun.utiles.sql.TipoDato.FECHA_HORA;
 import static es.jbp.comun.utiles.sql.TipoDato.REAL;
 import es.jbp.comun.utiles.tiempo.Fecha;
+import es.jbp.comun.utiles.tiempo.FechaAbstracta;
 import es.jbp.comun.utiles.tiempo.FechaHora;
 import es.jbp.comun.utiles.tiempo.FechaHoraMs;
 import java.io.UnsupportedEncodingException;
@@ -159,4 +160,5 @@ public abstract class FormateadorBasico implements FormateadorSql {
     public String getNombreParametro(int indice) {
         return "$" + (indice + 1);
     }
+
 }

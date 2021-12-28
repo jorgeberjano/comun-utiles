@@ -182,30 +182,30 @@ public class SentenciaSql {
         return sql;
     }
 
-    public void asignar(String strCampo, Object valor) {
+//    public void asignar(String strCampo, Object valor) {
+//
+//        String strValor = aFormatoSql(valor);
+//        asignarValorSql(strCampo, "'" + strValor + "'");
+//    }
 
-        String strValor = aFormatoSql(valor);
-        asignarValorSql(strCampo, "'" + strValor + "'");
-    }
-
-    // TODO: esto debe ser dependiente del tipo de base de datos
-    public static String aFormatoSql(Object valor) {
-        if (valor == null) {
-            return "null";
-        } else if (valor instanceof Boolean) {
-            return (Boolean) valor ? "1" : "0";
-        } else if (valor instanceof Integer
-                || valor instanceof Long
-                || valor instanceof Double
-                || valor instanceof Float) {
-            return valor.toString();
-        } else if (valor instanceof FechaAbstracta) {
-            return "'" + valor.toString() + "'";
-        } else {
-            // Se sustituyen las comillas por dos comillas (código de escape)
-            return "'" + valor.toString().replace("'", "''") + "'";
-        }
-    }
+//    // TODO: esto debe ser dependiente del tipo de base de datos
+//    public static String aFormatoSql(Object valor) {
+//        if (valor == null) {
+//            return "null";
+//        } else if (valor instanceof Boolean) {
+//            return (Boolean) valor ? "1" : "0";
+//        } else if (valor instanceof Integer
+//                || valor instanceof Long
+//                || valor instanceof Double
+//                || valor instanceof Float) {
+//            return valor.toString();
+//        } else if (valor instanceof FechaAbstracta) {
+//            return "'" + valor.toString() + "'";
+//        } else {
+//            // Se sustituyen las comillas por dos comillas (código de escape)
+//            return "'" + valor.toString().replace("'", "''") + "'";
+//        }
+//    }
 
     public void asignarNull(String strCampo) {
         asignarValorSql(strCampo, "Null");
